@@ -1,0 +1,334 @@
+\documentclass[a4paper,12pt]{report}
+
+
+
+\usepackage[utf8]{luainputenc}
+\usepackage[german]{babel}
+\usepackage[textwidth=483.65pt,textheight=700.80pt]{geometry}
+\usepackage{enumitem}
+%\usepackage{rotating}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+%\usepackage{scrpage2}
+\usepackage{longtable}
+\usepackage{verbatim}
+\usepackage{varioref}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{color}
+\usepackage{array}
+\usepackage{colortbl}
+%\usepackage{lscape}
+\usepackage{pdflscape}
+\usepackage{totpages}
+\usepackage[table]{xcolor}
+%\usepackage{piechart}
+%\usepackage{dotchart}
+%\usepackage{nofloat}
+\usepackage{pgfgantt}
+\usepackage{luacode}
+
+%\usepackage{sun-colors}
+\usepackage[rigidchapters,explicit]{titlesec}
+
+%%\directlua{package.cpath = "/usr/local/lib/lua/5.3/luasql/postgres.so"}
+%%\directlua{require("luasql.mysql")}
+
+\begin{luacode*}
+  package.cpath = "/usr/local/lib/lua/5.3/luasql/postgres.so"  
+local driver = require "luasql.postgres"
+-- create environment object
+env = assert (driver.postgres())
+-- connect to data source
+con = assert (env:connect("host=127.0.0.1 port=5432 user=roman password=roman dbname=project"))
+cur = assert (con:execute"SELECT *  FROM pg_catalog.pg_tables ;")
+col=cur:getcolnames()
+col_name=""
+for i = 1, #col do
+ col_name=col_name..string.format("%s ",col[i])
+end
+print(col_name)
+row = cur:fetch ({}, "n")
+while row do
+row_val=""
+  for i =1, #row do
+	   if row[i] ~= nil then
+             row_val=row_val .. string.format("%s ",row[i] )
+	   else
+             row_val=row_val .. "- " 
+	   end
+   end
+	   print(row_val)
+  --print(string.format(" %s,  %s", row[1], row[2]))
+  -- reusing the table of results
+  row = cur:fetch (row, "n")
+end
+
+
+project_id=arg[3]
+
+   local query="select name,p_id,descr from project where p_id="..project_id..";"
+   --tex.sprint("\\bold{"..query.."}\n")
+   print(query)
+        local cur_c= con:execute(query)
+        local   row1 =cur_c:fetch ({}, "a")
+	prj_name=row1.name
+	cust_name=row1.name
+
+
+
+\end{luacode*}
+
+\xdefinecolor{TableLightGray}{rgb}{0.90,0.90,0.90}
+
+\hypersetup{
+pdftitle={Project}
+pdfauthor={Pollak's Software}
+}
+\pdfcompresslevel 9
+\pagestyle{fancyplain}
+%\pagestyle{scrheadings}
+%%\lhead{\includegraphics[scale=.1]{TDC_logo}}
+%%\lhead{\includegraphics[scale=.1]{TDC_logo}}
+\rhead{}
+\cfoot{\thepage{}/\ref{TotPages}}
+
+\definecolor{td2}{rgb}{.93,.54,.11}
+\definecolor{td}{rgb}{.22,.28,.31}
+
+\input{title3}
+\begin{document}
+
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand \thesection {\@arabic\c@section}
+\renewcommand{\arraystretch}{1.5}
+
+%%\customer{T-Shirt}
+\customer{\directlua{tex.print(prj_name)}}
+\period{\today}
+\cnt_url{www.ruag.ch}
+%\cust_logo{jobs/<xsl:value-of select="$job_id"/>.png}
+\noindent
+\maketitle
+\newpage
+%\input{claim}
+\tableofcontents
+
+
+%\titleformat{\section}
+%{}{}{0em}{\colorbox{td}{\parbox{17cm}{\normalfont\large\bfseries\color{white}\thesection\hspace{.3cm} #1}}}
+
+
+\setcounter{chapter}{0}
+
+
+\begin{luacode*}
+
+
+
+function get_party(prj, st)
+
+local query = "select party_id,p_func from party where p_id="..prj.." and s_id =" ..st..";"
+print(query)
+tex.sprint("\\begin{itemize}")
+ local cur_c= con:execute(query)
+ local   row1 =cur_c:fetch ({}, "a")
+ 
+ while row1 do
+     tex.sprint("\\item{".. row1.p_func .. ":} ")
+     print(string.format("%s ",row1['p_func']))
+     local query1 = "select p_func,p_fname,p_name,p_email from party_memb where p_id="..prj.." and party_id =" ..row1['party_id'] ..";"
+     print(query1)
+    local cur_c1= con:execute(query1)
+    local   row2 =cur_c1:fetch ({}, "a")
+
+    tex.sprint("\\begin{longtable}{p{2cm}p{2cm}p{2cm}p{5cm}}")
+    
+    while row2 do
+     tex.sprint(string.format("%s & %s & %s & %s\\\\",row2['p_func'],row2['p_fname'],row2['p_name'],row2['p_email']))
+    row2 =cur_c1:fetch (row2, "a")
+    end
+     tex.sprint("\\end{longtable}")
+   
+ row1 =cur_c:fetch (row1, "a")
+ end
+ tex.sprint("\\end{itemize}")
+end
+
+
+function conv_m(text)
+
+ text=string.gsub(text,"&#39","\\verb|'|")
+ text=string.gsub(text,"&#40","(")
+ text=string.gsub(text,"&#41",")")
+ text=string.gsub(text,"&","\\verb|&|")
+ text=string.gsub(text,"#","\\verb|#|")
+ text=string.gsub(text,"_","\\textunderscore{}")
+ --text=string.gsub(text,"^","\\verb|^|")
+ text=string.gsub(text,"/","/\\allowbreak{}")
+ --text=string.gsub(text,"%c","")
+ test=string.gsub(text,"\026","")
+
+return text
+end
+
+
+
+function get_doc(nr)
+
+return nr
+end
+
+
+mcr={}
+mcr["PRJ"]=cust_name
+
+tbl={}
+tbl["MIL"]="Meilenstein"
+tbl["ADD_PH"]="Projekt Phase"
+tbl["ADD"]="Zusätzlich"
+
+--[[
+tbl["SID"]="Teradata Site ID"
+tbl["INS"]="Installation"
+tbl["MIG"]="Data Migration"
+tbl["UPD"]="Update/Upgrade"
+tbl["DEC"]="Decomission"
+tbl["MIL"]="Milestone"
+tbl["ADD"]="Additional"
+tbl["ADD_PH"]="Project Phase"
+tbl["BAR"]="Backup/Restore Installation"
+--]]
+
+
+
+--[[
+phs={}
+phs[1]="Inittiation"
+phs[2]="Planning"
+phs[3]="Executing"
+phs[4]="Monitoring and Controlling"
+phs[5]="Closing"
+
+--]]
+
+
+phs={}
+phs[1]="Initialisierung"
+phs[2]="Plannug"
+phs[3]="Ausführung"
+phs[4]="Überwachung und Kontrolle"
+phs[5]="Ende"
+phs[6]="Mission Analysis"
+phs[7]="Mission Definition Review (MDR)"
+phs[8]="Feasibility/Conception"
+phs[9]="Preliminary Requirement Review (PRR)"
+phs[10]="Preliminary Definition phase"
+phs[11]="System Definition Review (SDR)"
+phs[12]="Preliminary Design"
+phs[13]="Preliminary Design Review (PDR)"
+phs[14]="Final Design"
+phs[15]="Critical Design Review (CDR)"
+phs[16]="Qualification Review (QR)"
+phs[17]="Acceptance Review (AR)"
+phs[18]="Utilization"
+phs[19]="Operational Readiness Review (ORR)"
+phs[20]="Flight Readiness Review (FRR)"
+phs[21]="Launch Readiness Review (LRR)"
+phs[22]="Flight Qualification Review (FQR)"
+phs[23]="End of Life Review (EOLR)"
+phs[24]="Disposal"
+
+
+
+function conv_macro(str)
+str1=string.gsub(str,"$$(%w*)", function(a)  print(a) if (mcr[a] ~= nil ) then print (mcr[a] ) return mcr[a] end end)
+
+return str1
+end
+
+
+project_id=arg[3]
+
+   local query="select name,p_id,descr from project where p_id="..project_id..";"
+   --tex.sprint("\\bold{"..query.."}\n")
+   print(query)
+        local cur_c= con:execute(query)
+        local   row1 =cur_c:fetch ({}, "a")
+	prj_name=row1.name
+	cust_name=row1.name
+
+   
+
+    tex.sprint("\\chapter*{Projekt ``"..conv_m(prj_name).."'' }")
+    tex.sprint(conv_m(row1.descr))
+    tex.sprint("\\section{Projekt Teilnehmer}")
+    get_party(project_id,0)
+    tex.sprint("\\section{Projekt Schritte}")
+
+
+    
+    
+               tex.sprint("\\begin{enumerate}")
+
+
+
+
+
+		local cur2= con:execute("Select s_id, st_name,name,to_char(tt,'DD-MM-YYYY') as tt,cnt, st_add from steps where p_id="..project_id.." order by ord;")
+                 local row2 =cur2:fetch ({}, "a")
+		while row2 do
+                        --tex.sprint(string.format("\\item{%s }\\newline",conv_m(tbl[row2.st_name]))) 
+			mcr["SID"]=row2.name
+                         
+			mcr["DATE"]=row2.tt
+			mcr["NR"]=row2.cnt
+                        
+		
+			if (row2.st_name == "MIL" )  then
+				mcr["NAME"]=row2.name
+				str=get_doc(7)
+				print(conv_macro(str)) 
+              --  tex.sprint("\\item{"..conv_macro(str).." ".. row2.tt.. "}")
+                tex.sprint("\\item{Meilenstein - "..row2.tt.." "..row2.name.. "}")
+				
+			elseif (row2.st_name == "ADD" )  then
+				mcr["NAME"]=row2.name
+				if (row2.st_add == "inc") then mcr["TYPE"]="Incident" else mcr["TYPE"]="Change Control" end
+				str=get_doc(8)
+				print(conv_macro(str)) 
+                                tex.sprint("\\item{Task - "..row2.tt.." "..conv_macro(row2.name).."}")
+			elseif (row2.st_name == "ADD_PH" )  then
+			    mcr["NAME"]=row2.name
+                print("add "..row2.st_add)
+                print(phs[tonumber(row2.st_add)])
+				if (row2.st_add == "inc") then mcr["TYPE"]="Incident" else mcr["TYPE"]="Change Control" end
+				str=get_doc(9)
+				print(conv_macro(str)) 
+               -- tex.sprint("\\item{"..conv_macro(str).."}")
+                tex.sprint("\\item{Projekt Phase "..phs[tonumber(row2.st_add)].. " - " ..row2.tt.. " ".. row2.name.. "}")
+
+           	elseif (row2.st_name == "ADD_MET" )  then
+                tex.sprint("\\item{Meeting - ".. row2.tt .." " .. row2.name .. "}\\\\")
+                --tex.sprint(conv_m(row2.st_add))
+                tex.sprint("Teilnehmer:\\\\")
+			    get_party(project_id,row2.s_id)
+                tex.sprint(conv_m(row2.st_add))
+
+			end
+				
+                        print(row2.st_name.." & "..row2.name.."\\\\")
+			print(tbl[row2.st_name])
+                        row2 =cur2:fetch (row2, "a")
+                 end
+		tex.sprint("\\end{enumerate}")
+
+
+
+
+
+
+\end{luacode*}
+
+\end{document} 

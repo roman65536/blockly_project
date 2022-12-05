@@ -1,0 +1,31 @@
+\makeatletter
+\def\thickhrulefill{\leavevmode \leaders \hrule height 1pt\hfill \kern \z@}
+\def\maketitle{%
+ \null
+\thispagestyle{empty}
+ \setlength{\unitlength}{1mm}
+\begin{picture}(0,0)
+%%  \put(-5,-5){\color{white}\includegraphics[width=2.5in]{TDC_logo}}
+%%  \put(-5,-5){\color{white}\includegraphics[width=2.5in]{TDC_logo}}
+%%   \put(-5,-5){\color{white}\includegraphics[width=3.5in]{TER_Orange_Logo} \includegraphics[width=2.5in]{TER_4C_NOTAG}}
+   \put(-5,-239){\color{black}\@cnt_url}
+ \end{picture}
+
+ \begin{minipage}{0.99\linewidth}
+ \begin{minipage}{0.25\linewidth}
+  \hfill
+  \vfill
+ \end{minipage}
+ \begin{minipage}{0.75\linewidth}
+  \vskip 5cm
+  \color{td}\Huge{\textbf{\textsf{Projekt\newline{\@customer}\newline\today}}}
+   \vskip 6.5cm
+%%  \includegraphics[scale=.8]{\@cust_logo}\\
+%%  \color{black}\Huge{\textbf{\textsf{\@customer}}}
+\end{minipage}
+ \end{minipage}
+}
+\def\customer#1{\def\@customer{#1}}
+\def\period#1{\def\@period{#1}}
+\def\cnt_url#1{\def\@cnt_url{#1}}
+\def\cust_logo#1{\def\@cust_logo{#1}}
