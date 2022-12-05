@@ -29,7 +29,6 @@
 \usepackage{pgfgantt}
 \usepackage{luacode}
 
-%\usepackage{sun-colors}
 \usepackage[rigidchapters,explicit]{titlesec}
 
 %%\directlua{package.cpath = "/usr/local/lib/lua/5.3/luasql/postgres.so"}
@@ -88,9 +87,6 @@ pdfauthor={Pollak's Software}
 }
 \pdfcompresslevel 9
 \pagestyle{fancyplain}
-%\pagestyle{scrheadings}
-%%\lhead{\includegraphics[scale=.1]{TDC_logo}}
-%%\lhead{\includegraphics[scale=.1]{TDC_logo}}
 \rhead{}
 \cfoot{\thepage{}/\ref{TotPages}}
 
@@ -107,8 +103,7 @@ pdfauthor={Pollak's Software}
 %%\customer{T-Shirt}
 \customer{\directlua{tex.print(prj_name)}}
 \period{\today}
-\cnt_url{www.ruag.ch}
-%\cust_logo{jobs/<xsl:value-of select="$job_id"/>.png}
+\cnt_url{www.yourcompany.ch}
 \noindent
 \maketitle
 \newpage
@@ -188,19 +183,6 @@ tbl={}
 tbl["MIL"]="Meilenstein"
 tbl["ADD_PH"]="Projekt Phase"
 tbl["ADD"]="Zusätzlich"
-
---[[
-tbl["SID"]="Teradata Site ID"
-tbl["INS"]="Installation"
-tbl["MIG"]="Data Migration"
-tbl["UPD"]="Update/Upgrade"
-tbl["DEC"]="Decomission"
-tbl["MIL"]="Milestone"
-tbl["ADD"]="Additional"
-tbl["ADD_PH"]="Project Phase"
-tbl["BAR"]="Backup/Restore Installation"
---]]
-
 
 
 --[[
